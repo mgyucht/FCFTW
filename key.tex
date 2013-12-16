@@ -1,0 +1,332 @@
+\documentclass[11pt]{article} 
+\usepackage[latin1]{inputenc} 
+\usepackage[T1]{fontenc} 
+\usepackage{textcomp}
+\usepackage{fullpage} 
+\usepackage{url} 
+\usepackage{ocamldoc}
+\begin{document}
+\tableofcontents
+\section{Module {\tt{Key}} : Implementation of a triply-linked list, an extension of a doubly linked
+    list.}
+\label{module:Key}\index{Key@\verb`Key`}
+ A node in a triply linked list serves one of three purposes:
+
+
+    \begin{itemize}
+\item {\tt{DictEnd}} - the end of the list
+\item {\tt{Simple}} - a normal linked list node with a next and prev pointer
+\item {\tt{Bridge}} - a special linked list node. A {\tt{Bridge}} node represents a key
+    in common between two lists, and the two lists are maintained as two
+    fields within the node.
+\end{itemize}
+
+
+
+    For now, the types of {\tt{dict\_id\_t}} and {\tt{val\_t}} have been hardcoded into
+    the system, but later they could be modularized using a functor.
+
+
+
+\ocamldocvspace{0.5cm}
+
+
+
+\label{type:Key.dict-underscoreid-underscoret}\begin{ocamldoccode}
+type dict_id_t = string 
+\end{ocamldoccode}
+\index{dict-underscoreid-underscoret@\verb`dict_id_t`}
+\begin{ocamldocdescription}
+The type of the identifier for the dictionary.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{type:Key.val-underscoret}\begin{ocamldoccode}
+type val_t = string 
+\end{ocamldoccode}
+\index{val-underscoret@\verb`val_t`}
+\begin{ocamldocdescription}
+The type of the value of nodes in the list.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{type:Key.t}\begin{ocamldoccode}
+type t =
+  | DictEnd
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+Indicates the end of the list.
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+  | Simple of simple_t
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+Indicates a simple node in the
+              list.
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+  | Bridge of bridge_t
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+Indicates a bridge node between two
+              lists.
+\end{ocamldoccomment}
+\index{t@\verb`t`}
+\begin{ocamldocdescription}
+The basic key type.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{type:Key.link-underscoret}\begin{ocamldoccode}
+type link_t = {\char123}
+  mutable next : t ;
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+The next key in the list
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+  mutable prev : t ;
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+The previous key in the list
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+  dict : dict_id_t ;
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+The dictionary id for this list
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+{\char125}
+\end{ocamldoccode}
+\index{link-underscoret@\verb`link_t`}
+\begin{ocamldocdescription}
+{\tt{link\_t}} represents a link to keys before and after the current item.
+    It is used in one copy in the {\tt{Simple}} node and in two copies in the
+    {\tt{Bridge}} node.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{type:Key.simple-underscoret}\begin{ocamldoccode}
+type simple_t = {\char123}
+  svalue : val_t ;
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+The value of the simple node.
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+  link : link_t ;
+\end{ocamldoccode}
+\begin{ocamldoccomment}
+The links to nodes before and after
+                this node.
+\end{ocamldoccomment}
+\begin{ocamldoccode}
+{\char125}
+\end{ocamldoccode}
+\index{simple-underscoret@\verb`simple_t`}
+\begin{ocamldocdescription}
+{\tt{simple\_t}} is the type of a {\tt{Simple}} node. It has a value of {\tt{val\_t}}
+     and a link of {\tt{link\_t}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{type:Key.bridge-underscoret}\begin{ocamldoccode}
+type bridge_t = {\char123}
+  bvalue : val_t ;
+  d1 : link_t ;
+  d2 : link_t ;
+{\char125}
+\end{ocamldoccode}
+\index{bridge-underscoret@\verb`bridge_t`}
+\begin{ocamldocdescription}
+{\tt{bridge\_t}} is the type of a {\tt{Bridge}} node. it is identical to a
+    {\tt{Simple}} node except for the fact that it has two links rather than
+    just one.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.create-underscoresimple}\begin{ocamldoccode}
+val create_simple : val_t -> dict_id_t -> simple_t
+\end{ocamldoccode}
+\index{create-underscoresimple@\verb`create_simple`}
+\begin{ocamldocdescription}
+Creates a simple key containing {\tt{value}} for dictionary {\tt{did}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.belongs-underscoreto}\begin{ocamldoccode}
+val belongs_to : dict_id_t -> t -> bool
+\end{ocamldoccode}
+\index{belongs-underscoreto@\verb`belongs_to`}
+\begin{ocamldocdescription}
+Tests whether the input node belongs to {\tt{dict}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{exception:Key.No-underscorelink}\begin{ocamldoccode}
+exception No_link
+\end{ocamldoccode}
+\index{No-underscorelink@\verb`No_link`}
+\begin{ocamldocdescription}
+An exception that is thrown when trying to get the link of a
+    {\tt{DictEnd}} node.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.get-underscorelink}\begin{ocamldoccode}
+val get_link : dict_id_t -> t -> link_t
+\end{ocamldoccode}
+\index{get-underscorelink@\verb`get_link`}
+\begin{ocamldocdescription}
+Returns the link for the node for dictionary {\tt{dict}}, raising {\tt{No\_link}}
+    if the node is a {\tt{DictEnd}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.insert-underscoreafter}\begin{ocamldoccode}
+val insert_after : t -> t -> dict_id_t -> t
+\end{ocamldoccode}
+\index{insert-underscoreafter@\verb`insert_after`}
+\begin{ocamldocdescription}
+Inserts {\tt{ins}} immediately after {\tt{key}} in dictionary {\tt{dict}}, 
+    returning the new {\tt{ins}} node.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.insert-underscorebefore}\begin{ocamldoccode}
+val insert_before : t -> t -> dict_id_t -> t
+\end{ocamldoccode}
+\index{insert-underscorebefore@\verb`insert_before`}
+\begin{ocamldocdescription}
+Inserts {\tt{ins}} immediately before {\tt{key}} in dictionary {\tt{dict}}, 
+    returning the new {\tt{ins}} node.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.create-underscorebridge}\begin{ocamldoccode}
+val create_bridge : simple_t -> simple_t -> bridge_t
+\end{ocamldoccode}
+\index{create-underscorebridge@\verb`create_bridge`}
+\begin{ocamldocdescription}
+Takes two keys {\tt{k1}} and {\tt{k2}} and forms a bridge between them.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.to-underscorelist}\begin{ocamldoccode}
+val to_list : t -> dict_id_t -> val_t list
+\end{ocamldoccode}
+\index{to-underscorelist@\verb`to_list`}
+\begin{ocamldocdescription}
+Converts a triply-linked list into a regular list starting with node
+    {\tt{key}} and using the {\tt{dict}} link in any {\tt{Bridge}} nodes.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.prev-underscorekey}\begin{ocamldoccode}
+val prev_key : t -> dict_id_t -> t
+\end{ocamldoccode}
+\index{prev-underscorekey@\verb`prev_key`}
+\begin{ocamldocdescription}
+Returns the key before {\tt{key}} in {\tt{did}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.next-underscorekey}\begin{ocamldoccode}
+val next_key : t -> dict_id_t -> t
+\end{ocamldoccode}
+\index{next-underscorekey@\verb`next_key`}
+\begin{ocamldocdescription}
+Returns the key after {\tt{key}} in {\tt{did}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.is-underscorebridge}\begin{ocamldoccode}
+val is_bridge : t -> bool
+\end{ocamldoccode}
+\index{is-underscorebridge@\verb`is_bridge`}
+\begin{ocamldocdescription}
+Returns true if the node is a {\tt{Bridge}}.
+
+
+\end{ocamldocdescription}
+
+
+
+
+\label{val:Key.value}\begin{ocamldoccode}
+val value : t -> val_t
+\end{ocamldoccode}
+\index{value@\verb`value`}
+\begin{ocamldocdescription}
+Returns the value of a node, failing on DictEnd.
+
+
+\end{ocamldocdescription}
+
+
+\end{document}
